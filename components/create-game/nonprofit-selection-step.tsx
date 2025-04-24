@@ -119,7 +119,7 @@ export function NonprofitSelectionStep({ onSelect, onBack }: NonprofitSelectionS
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-medium">Select a Nonprofit</h2>
-      <p className="text-gray-400">
+      <p className="text-gray-500 dark:text-gray-400">
         Choose the nonprofit organization that will receive the funds raised by your game.
       </p>
 
@@ -130,12 +130,12 @@ export function NonprofitSelectionStep({ onSelect, onBack }: NonprofitSelectionS
           placeholder="Search by name, EIN, city, or state..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-gray-800 border-gray-700 pl-10"
+          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 pl-10"
         />
       </div>
 
-      <div className="bg-gray-800 rounded-lg overflow-hidden">
-        <div className="grid grid-cols-4 gap-4 p-3 border-b border-gray-700 text-gray-400 text-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="grid grid-cols-4 gap-4 p-3 border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm">
           <div>Name</div>
           <div>EIN</div>
           <div>City</div>
@@ -146,8 +146,8 @@ export function NonprofitSelectionStep({ onSelect, onBack }: NonprofitSelectionS
             filteredNonprofits.map((nonprofit) => (
               <div
                 key={nonprofit.id}
-                className={`grid grid-cols-4 gap-4 p-3 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors ${
-                  selectedNonprofit?.id === nonprofit.id ? "bg-gray-700" : ""
+                className={`grid grid-cols-4 gap-4 p-3 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                  selectedNonprofit?.id === nonprofit.id ? "bg-gray-100 dark:bg-gray-700" : ""
                 }`}
                 onClick={() => handleSelect(nonprofit)}
               >
@@ -158,13 +158,19 @@ export function NonprofitSelectionStep({ onSelect, onBack }: NonprofitSelectionS
               </div>
             ))
           ) : (
-            <div className="p-4 text-center text-gray-400">No nonprofits found matching your search.</div>
+            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+              No nonprofits found matching your search.
+            </div>
           )}
         </div>
       </div>
 
       <div className="flex justify-start mt-6 pb-6">
-        <Button variant="outline" onClick={onBack} className="bg-gray-800 border-gray-700">
+        <Button
+          variant="outline"
+          onClick={onBack}
+          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+        >
           Back
         </Button>
       </div>

@@ -41,7 +41,7 @@ export function StaticHorizontalMenu() {
   }
 
   return (
-    <div className="bg-gray-900 border-b border-gray-800 hidden md:block">
+    <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 hidden md:block">
       <div className="container mx-auto px-4 overflow-x-auto">
         <nav className="flex items-center space-x-6 h-10 min-w-max">
           {menuItems.map((item) => (
@@ -51,8 +51,8 @@ export function StaticHorizontalMenu() {
               className={cn(
                 "flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors whitespace-nowrap text-sm",
                 isActive(item.category)
-                  ? "text-yellow-500 font-medium"
-                  : "text-gray-300 hover:text-white hover:bg-gray-800",
+                  ? "text-orange-600 dark:text-yellow-500 font-medium"
+                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800",
               )}
             >
               {item.icon}

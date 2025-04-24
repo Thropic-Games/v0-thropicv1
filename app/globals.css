@@ -35,7 +35,7 @@
     --radius: 0.5rem;
 
     --gray-950: 0 0% 4%;
-    --warm-gray: 25 20% 11%;
+    --warm-gray: 25 20% 95%; /* Light warm gray */
   }
 
   .dark {
@@ -68,7 +68,7 @@
     --ring: 0 0% 83.1%;
 
     --gray-950: 0 0% 4%;
-    --warm-gray: 25 20% 11%;
+    --warm-gray: 25 20% 11%; /* Dark warm gray */
   }
 }
 
@@ -119,4 +119,30 @@ body {
   to {
     opacity: 1;
   }
+}
+
+.vertical-carousel {
+  position: relative;
+  height: calc(100% - 2rem); /* Account for the header */
+  overflow: hidden;
+}
+
+.vertical-carousel-item {
+  transition: transform 1s ease, opacity 1s ease;
+}
+
+.vertical-carousel-item.entering {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.vertical-carousel-item.exiting {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.vertical-carousel-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform 1s ease;
 }

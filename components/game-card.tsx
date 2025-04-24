@@ -1,6 +1,12 @@
+"use client"
+
+import type React from "react"
+
 import Image from "next/image"
-import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { ExternalLink } from "lucide-react"
+import { navigateToGame } from "@/lib/utils"
 
 interface GameCardProps {
   title: string
@@ -11,6 +17,7 @@ interface GameCardProps {
   donation?: string
   className?: string
   size?: "small" | "medium" | "large"
+  game?: any // Add game prop to pass game data
 }
 
 export function GameCard({
@@ -22,19 +29,20 @@ export function GameCard({
   donation,
   className = "",
   size = "medium",
+  game,
 }: GameCardProps) {
   const getStatusColor = (status?: string) => {
     switch (status) {
       case "In Progress":
-        return "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+        return "bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-500/30"
       case "Upcoming":
-        return "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+        return "bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-500/30"
       case "Completed":
-        return "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
+        return "bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-500/30"
       case "Registering":
-        return "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"
+        return "bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-500/30"
       default:
-        return "bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
+        return "bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-500/30"
     }
   }
 
@@ -44,10 +52,17 @@ export function GameCard({
     large: "h-64",
   }
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (game) {
+      navigateToGame(game)
+    }
+  }
+
   return (
-    <Link href="#" className={`block group ${className}`}>
-      <div className="bg-gray-900 rounded-xl overflow-hidden relative">
-        <div className={`relative ${sizeClasses[size]}`}>
+    <div className={`block group ${className}`}>
+      <div className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden relative">
+        <div className={`relative ${sizeClasses[size]}`} onClick={handleClick} style={{ cursor: "pointer" }}>
           <Image
             src={image || "/placeholder.svg"}
             alt={title}
@@ -67,15 +82,23 @@ export function GameCard({
           </div>
         </div>
 
-        {(sponsor || donation) && (
-          <div className="p-3 border-t border-gray-800">
-            <div className="flex justify-between items-center">
-              {sponsor && <p className="text-sm text-gray-400">By {sponsor}</p>}
-              {donation && <p className="text-sm text-yellow-500 font-medium">{donation}</p>}
-            </div>
+        <div className="p-3 border-t border-gray-200 dark:border-gray-800">
+          <div className="flex justify-between items-center">
+            {sponsor && <p className="text-sm text-gray-600 dark:text-gray-400">By {sponsor}</p>}
+            {donation && <p className="text-sm text-orange-600 dark:text-yellow-500 font-medium">{donation}</p>}
           </div>
-        )}
+          {game && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full mt-2 flex items-center justify-center"
+              onClick={handleClick}
+            >
+              Open Game <ExternalLink className="h-3 w-3 ml-1" />
+            </Button>
+          )}
+        </div>
       </div>
-    </Link>
+    </div>
   )
 }

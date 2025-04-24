@@ -55,6 +55,10 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        thropic: {
+          yellow: "#ffbb00",
+          orange: "#fb6542",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

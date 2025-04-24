@@ -1,45 +1,38 @@
 "use client"
 
-import { useFirebase } from "@/contexts/firebase-context"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useEffect, useState } from "react"
-import { doc, getDoc } from "firebase/firestore"
-import { BanknoteIcon as BankIcon } from "lucide-react"
-
-interface UserData {
-  displayName?: string
-  photoURL?: string
-  email?: string
-  bio?: string
-}
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSupabase } from "@/hooks/use-supabase"
+import type { User } from "@supabase/supabase-js"
+import type { Profile } from "@/types/supabase"
 
 export function UserProfile() {
-  const { user, signOut, db } = useFirebase()
-  const [userData, setUserData] = useState<UserData | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [hasStripeConnected, setHasStripeConnected] = useState(false)
-  const [unclaimedBalance, setUnclaimedBalance] = useState(125.0)
+  const { supabase } = useSupabase()
+  const router = useRouter()
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user) {
-        setLoading(false)
-        return
-      }
-
+    const fetchUserAndProfile = async () => {
       try {
-        // Get user data from Firestore
-        const userDoc = await getDoc(doc(db, "users", user.uid))
-        if (userDoc.exists()) {
-          setUserData(userDoc.data() as UserData)
-        } else {
-          // If no custom data, use auth data
-          setUserData({
-            displayName: user.displayName || undefined,
-            photoURL: user.photoURL || undefined,
-            email: user.email || undefined,
-          })
+        // Get current user
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        setUser(user)
+
+        if (user) {
+          // Fetch user profile
+          const { data, error } = await supabase.from("profile").select("*").eq("id", user.id).single()
+
+          if (error) {
+            console.error("Error fetching profile:", error)
+          } else {
+            setProfile(data)
+          }
         }
       } catch (error) {
         console.error("Error fetching user data:", error)
@@ -48,73 +41,98 @@ export function UserProfile() {
       }
     }
 
-    fetchUserData()
-  }, [user, db])
+    fetchUserAndProfile()
 
-  useEffect(() => {
-    if (user) {
-      // In a real app, you would fetch this data from your backend
-      // This is just a mock implementation for demonstration
-      setHasStripeConnected(false)
-      setUnclaimedBalance(125.0)
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null)
+      if (!session?.user) {
+        setProfile(null)
+      }
+    })
+
+    return () => {
+      authListener.subscription.unsubscribe()
     }
-  }, [user])
+  }, [supabase])
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut()
+      router.push("/")
+    } catch (error) {
+      console.error("Error signing out:", error)
+    }
+  }
 
   if (loading) {
-    return <div className="text-center py-8">Loading profile...</div>
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-7 w-40 rounded mb-2"></div>
+          <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-5 w-64 rounded"></div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-5 w-full rounded"></div>
+          <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-5 w-3/4 rounded"></div>
+        </CardContent>
+        <CardFooter>
+          <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-9 w-24 rounded"></div>
+        </CardFooter>
+      </Card>
+    )
   }
 
   if (!user) {
-    return <div className="text-center py-8">Please sign in to view your profile.</div>
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Not Signed In</CardTitle>
+          <CardDescription>You need to sign in to view your profile</CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Button onClick={() => router.push("/login")}>Sign In</Button>
+        </CardFooter>
+      </Card>
+    )
   }
 
   return (
-    <div className="bg-gray-900 rounded-xl p-6 max-w-md mx-auto">
-      <div className="flex flex-col items-center">
-        <Avatar className="w-24 h-24 mb-4">
-          <AvatarImage src={userData?.photoURL || ""} alt={userData?.displayName || "User"} />
-          <AvatarFallback className="bg-yellow-500 text-white text-xl">
-            {userData?.displayName?.[0] || userData?.email?.[0] || "U"}
-          </AvatarFallback>
-        </Avatar>
-
-        <h2 className="text-xl font-medium mb-1">{userData?.displayName || "User"}</h2>
-
-        <p className="text-gray-400 mb-4">{userData?.email}</p>
-
-        {userData?.bio && <p className="text-center mb-6 text-gray-300">{userData.bio}</p>}
-
-        {unclaimedBalance > 0 && !hasStripeConnected && (
-          <div className="mt-6 bg-yellow-500/10 border border-yellow-600 rounded-lg p-4">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-              <div>
-                <p className="text-yellow-400 font-medium">${unclaimedBalance.toFixed(2)} in unclaimed winnings!</p>
-                <p className="text-sm text-yellow-400/80">Connect your bank account to receive your funds.</p>
-              </div>
-              <Button
-                className="bg-yellow-500 hover:bg-yellow-600 text-black whitespace-nowrap"
-                onClick={() => (window.location.href = "/profile/connect-bank")}
-              >
-                <BankIcon className="h-4 w-4 mr-2" />
-                Connect Bank Account
-              </Button>
-            </div>
-          </div>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>{profile?.full_name || user.email}</CardTitle>
+        <CardDescription>{user.email}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {profile ? (
+          <>
+            {profile.username && (
+              <p>
+                <strong>Username:</strong> {profile.username}
+              </p>
+            )}
+            {profile.bio && (
+              <p>
+                <strong>Bio:</strong> {profile.bio}
+              </p>
+            )}
+            {profile.website && (
+              <p>
+                <strong>Website:</strong> {profile.website}
+              </p>
+            )}
+          </>
+        ) : (
+          <p>No profile information available. Please complete your profile.</p>
         )}
-
-        {hasStripeConnected && (
-          <div className="mt-6 bg-green-500/10 border border-green-600 rounded-lg p-4">
-            <div className="flex items-center gap-2">
-              <BankIcon className="h-4 w-4 text-green-500" />
-              <p className="text-green-400">Bank account connected</p>
-            </div>
-          </div>
-        )}
-
-        <Button variant="outline" onClick={signOut} className="mt-4">
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button variant="outline" onClick={() => router.push("/profile/edit")}>
+          Edit Profile
+        </Button>
+        <Button variant="destructive" onClick={handleSignOut}>
           Sign Out
         </Button>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   )
 }

@@ -25,6 +25,7 @@ const allGames = [
     sponsor: "Augusta National",
     donation: "$12,450",
     category: "Golf",
+    template_id: "masters",
   },
   {
     id: 2,
@@ -35,6 +36,7 @@ const allGames = [
     sponsor: "NBA Cares",
     donation: "$15,900",
     category: "Basketball",
+    template_id: "nba",
   },
   {
     id: 3,
@@ -45,6 +47,7 @@ const allGames = [
     sponsor: "NHL Foundation",
     donation: "$8,750",
     category: "Hockey",
+    template_id: "stanleycup",
   },
   {
     id: 4,
@@ -55,6 +58,7 @@ const allGames = [
     sponsor: "MLB Community",
     donation: "$10,200",
     category: "Baseball",
+    template_id: "mlb",
   },
   {
     id: 5,
@@ -65,6 +69,7 @@ const allGames = [
     sponsor: "Academy Foundation",
     donation: "$7,300",
     category: "Entertainment",
+    template_id: "oscars",
   },
   {
     id: 6,
@@ -75,6 +80,7 @@ const allGames = [
     sponsor: "Recording Academy",
     donation: "$9,100",
     category: "Entertainment",
+    template_id: "grammys",
   },
   {
     id: 7,
@@ -85,6 +91,7 @@ const allGames = [
     sponsor: "Green Initiative",
     donation: "$14,500",
     category: "Environment",
+    template_id: "climate",
   },
   {
     id: 8,
@@ -95,6 +102,7 @@ const allGames = [
     sponsor: "Education First",
     donation: "$6,800",
     category: "Education",
+    template_id: "spellingbee",
   },
   {
     id: 9,
@@ -105,6 +113,7 @@ const allGames = [
     sponsor: "Pet Lovers Association",
     donation: "$5,200",
     category: "Animals",
+    template_id: "animalshelter",
   },
   {
     id: 10,
@@ -115,6 +124,7 @@ const allGames = [
     sponsor: "Health Foundation",
     donation: "$11,300",
     category: "Health",
+    template_id: "healthrun",
   },
   {
     id: 11,
@@ -125,6 +135,7 @@ const allGames = [
     sponsor: "NFL Foundation",
     donation: "$18,500",
     category: "Football",
+    template_id: "football",
   },
 ]
 
@@ -185,7 +196,7 @@ export default function GamesPage() {
   const activeGames = allGames.filter((game) => game.status === "In Progress")
 
   return (
-    <div className="flex flex-col h-full bg-black text-white overflow-hidden">
+    <div className="flex flex-col h-full bg-white dark:bg-black text-gray-900 dark:text-white overflow-hidden">
       {/* Header spans full width and stays fixed */}
       <SiteHeader />
 
@@ -208,7 +219,7 @@ export default function GamesPage() {
                 {/* Main column - All Games */}
                 <div className="lg:col-span-2 space-y-8">
                   {/* All Games Section */}
-                  <Card className="bg-gray-900 border-gray-800">
+                  <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
                     <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                       <CardTitle>All Games</CardTitle>
                       <ViewToggle view={viewMode} onChange={setViewMode} className="mt-2 sm:mt-0" />
@@ -233,6 +244,7 @@ export default function GamesPage() {
                                   status={game.status as any}
                                   sponsor={game.sponsor}
                                   donation={game.donation}
+                                  game={game}
                                 />
                               ))}
                             </div>
@@ -248,12 +260,13 @@ export default function GamesPage() {
                                   status={game.status as any}
                                   sponsor={game.sponsor}
                                   donation={game.donation}
+                                  template_id={game.template_id}
                                 />
                               ))}
                             </div>
                           )
                         ) : (
-                          <div className="py-8 text-center text-gray-400">
+                          <div className="py-8 text-center text-gray-500 dark:text-gray-400">
                             No games found matching your search criteria.
                           </div>
                         )}
@@ -262,7 +275,7 @@ export default function GamesPage() {
                   </Card>
 
                   {/* Active Games Section */}
-                  <Card className="bg-gray-900 border-gray-800">
+                  <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
                     <CardHeader>
                       <CardTitle>Active Games</CardTitle>
                     </CardHeader>
@@ -277,6 +290,7 @@ export default function GamesPage() {
                             status={game.status as any}
                             sponsor={game.sponsor}
                             donation={game.donation}
+                            game={game}
                           />
                         ))}
                       </div>
@@ -286,7 +300,7 @@ export default function GamesPage() {
 
                 {/* Sidebar column - Recommended Games */}
                 <div className="space-y-6">
-                  <Card className="bg-gray-900 border-gray-800">
+                  <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
                     <CardHeader>
                       <CardTitle>Recommended For You</CardTitle>
                     </CardHeader>
@@ -299,6 +313,7 @@ export default function GamesPage() {
                             image={game.image}
                             charity={game.charity}
                             size="small"
+                            game={game}
                           />
                         ))}
                       </div>
@@ -306,13 +321,13 @@ export default function GamesPage() {
                   </Card>
 
                   {/* Quick Links */}
-                  <Card className="bg-gray-900 border-gray-800">
+                  <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
                     <CardHeader>
                       <CardTitle>Quick Links</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <Tabs defaultValue="popular">
-                        <TabsList className="bg-gray-800 w-full">
+                        <TabsList className="bg-gray-100 dark:bg-gray-800 w-full">
                           <TabsTrigger value="popular">Popular</TabsTrigger>
                           <TabsTrigger value="new">New</TabsTrigger>
                           <TabsTrigger value="ending">Ending Soon</TabsTrigger>
@@ -351,9 +366,9 @@ export default function GamesPage() {
 // Helper component for quick links
 function QuickLinkItem({ title, donation }: { title: string; donation: string }) {
   return (
-    <div className="flex justify-between items-center p-3 bg-gray-800 rounded-md hover:bg-gray-700 transition-colors">
-      <span className="font-light">{title}</span>
-      <span className="text-yellow-500">{donation}</span>
+    <div className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+      <span className="font-light text-gray-900 dark:text-white">{title}</span>
+      <span className="text-orange-600 dark:text-yellow-500">{donation}</span>
     </div>
   )
 }

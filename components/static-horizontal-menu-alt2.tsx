@@ -24,7 +24,7 @@ export function StaticHorizontalMenuAlt2() {
   ]
 
   return (
-    <div className="bg-gray-900 border-b border-gray-800 hidden md:block">
+    <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 hidden md:block">
       <div className="container mx-auto px-4">
         <nav className="flex items-center space-x-8 h-12 overflow-x-auto">
           {menuItems.map((item) => (
@@ -34,8 +34,8 @@ export function StaticHorizontalMenuAlt2() {
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-md transition-colors whitespace-nowrap",
                 isActive(item.path)
-                  ? "text-yellow-500 font-medium"
-                  : "text-gray-300 hover:text-white hover:bg-gray-800",
+                  ? "text-orange-600 dark:text-yellow-500 font-medium"
+                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800",
               )}
             >
               {item.icon}

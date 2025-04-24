@@ -116,7 +116,7 @@ export function CreateGameForm() {
 
   if (isComplete) {
     return (
-      <Card className="bg-gray-900 border-gray-800 mb-20">
+      <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 mb-20">
         <CardHeader>
           <CardTitle className="text-center">Game Created Successfully!</CardTitle>
         </CardHeader>
@@ -125,34 +125,37 @@ export function CreateGameForm() {
           <p className="text-center text-lg mb-2">
             Your game has been created and is ready to share with participants.
           </p>
-          <div className="bg-gray-800 p-4 rounded-lg w-full max-w-md mt-4">
+          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg w-full max-w-md mt-4">
             <h3 className="font-medium mb-2">Game Details</h3>
             <p>
-              <span className="text-gray-400">Title:</span> {gameDetails?.title}
+              <span className="text-gray-500 dark:text-gray-400">Title:</span> {gameDetails?.title}
             </p>
             <p>
-              <span className="text-gray-400">Template:</span> {selectedTemplate?.name}
+              <span className="text-gray-500 dark:text-gray-400">Template:</span> {selectedTemplate?.name}
             </p>
             <p>
-              <span className="text-gray-400">Organization:</span>{" "}
+              <span className="text-gray-500 dark:text-gray-400">Organization:</span>{" "}
               {organizationType === "nonprofit" ? selectedNonprofit?.name : "Local Organization"}
             </p>
             <p>
-              <span className="text-gray-400">Start Date:</span> {gameDetails?.startDate}
+              <span className="text-gray-500 dark:text-gray-400">Start Date:</span> {gameDetails?.startDate}
             </p>
             <p>
-              <span className="text-gray-400">End Date:</span> {gameDetails?.endDate}
+              <span className="text-gray-500 dark:text-gray-400">End Date:</span> {gameDetails?.endDate}
             </p>
             <p>
-              <span className="text-gray-400">Entry Fee:</span> {gameDetails?.entryFee}
+              <span className="text-gray-500 dark:text-gray-400">Entry Fee:</span> {gameDetails?.entryFee}
             </p>
             <p>
-              <span className="text-gray-400">Fundraising Goal:</span> {gameDetails?.fundraisingGoal}
+              <span className="text-gray-500 dark:text-gray-400">Fundraising Goal:</span> {gameDetails?.fundraisingGoal}
             </p>
           </div>
         </CardContent>
         <CardFooter className="flex justify-center pb-6">
-          <Button onClick={handleManageGame} className="bg-yellow-500 hover:bg-yellow-600 text-black">
+          <Button
+            onClick={handleManageGame}
+            className="bg-amber-500 hover:bg-amber-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white dark:text-black"
+          >
             Manage Your Game
           </Button>
         </CardFooter>
@@ -161,19 +164,21 @@ export function CreateGameForm() {
   }
 
   return (
-    <Card className="bg-gray-900 border-gray-800 mb-20">
+    <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 mb-20">
       <CardHeader>
         <CardTitle>Create a New Game</CardTitle>
-        <CardDescription>Follow the steps below to set up your fundraising game</CardDescription>
+        <CardDescription className="text-gray-600 dark:text-gray-400">
+          Follow the steps below to set up your fundraising game
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {/* Wider progress indicator */}
         <div className="mb-8 w-full max-w-2xl mx-auto">
           <div className="relative">
             {/* Horizontal line connecting all steps */}
-            <div className="absolute top-4 left-0 right-0 h-1 bg-gray-800">
+            <div className="absolute top-4 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-800">
               <div
-                className="h-full bg-yellow-500 transition-all duration-300"
+                className="h-full bg-amber-500 dark:bg-yellow-500 transition-all duration-300"
                 style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
               ></div>
             </div>
@@ -184,12 +189,14 @@ export function CreateGameForm() {
                 <div key={index} className="flex flex-col items-center">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center z-10 ${
-                      index + 1 <= currentStep ? "bg-yellow-500 text-black" : "bg-gray-800 text-gray-400"
+                      index + 1 <= currentStep
+                        ? "bg-amber-500 dark:bg-yellow-500 text-white dark:text-black"
+                        : "bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     {index + 1}
                   </div>
-                  <span className="text-xs text-gray-400 mt-2 text-center w-24">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center w-24">
                     {index === 0
                       ? "Organization Type"
                       : index === 1

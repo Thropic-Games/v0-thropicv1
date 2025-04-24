@@ -127,7 +127,7 @@ export function GameTemplateStep({ onSelect, onBack }: GameTemplateStepProps) {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-medium">Select a Game Template</h2>
-      <p className="text-gray-400">
+      <p className="text-gray-500 dark:text-gray-400">
         Choose a game template that will engage your participants and raise funds for your cause.
       </p>
 
@@ -140,7 +140,7 @@ export function GameTemplateStep({ onSelect, onBack }: GameTemplateStepProps) {
             placeholder="Search templates..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-gray-800 border-gray-700 pl-10"
+            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 pl-10"
           />
         </div>
 
@@ -151,8 +151,8 @@ export function GameTemplateStep({ onSelect, onBack }: GameTemplateStepProps) {
               variant="outline"
               className={`cursor-pointer ${
                 activeFilters.includes(category)
-                  ? "bg-yellow-500/20 text-yellow-400 border-yellow-500"
-                  : "bg-gray-800 border-gray-700"
+                  ? "bg-amber-100 text-amber-600 border-amber-300 dark:bg-yellow-500/20 dark:text-yellow-400 dark:border-yellow-500"
+                  : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
               }`}
               onClick={() => toggleFilter(category)}
             >
@@ -165,7 +165,7 @@ export function GameTemplateStep({ onSelect, onBack }: GameTemplateStepProps) {
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              className="h-6 px-2 text-xs text-gray-400 hover:text-white"
+              className="h-6 px-2 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
               <X className="h-3 w-3 mr-1" />
               Clear
@@ -180,8 +180,10 @@ export function GameTemplateStep({ onSelect, onBack }: GameTemplateStepProps) {
           {filteredTemplates.map((template) => (
             <Card
               key={template.id}
-              className={`bg-gray-800 border-gray-700 hover:border-yellow-500 cursor-pointer transition-all overflow-hidden ${
-                selectedTemplate?.id === template.id ? "border-yellow-500 ring-1 ring-yellow-500" : ""
+              className={`bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-amber-500 dark:hover:border-yellow-500 cursor-pointer transition-all overflow-hidden ${
+                selectedTemplate?.id === template.id
+                  ? "border-amber-500 dark:border-yellow-500 ring-1 ring-amber-500 dark:ring-yellow-500"
+                  : ""
               }`}
               onClick={() => handleSelect(template)}
             >
@@ -191,22 +193,30 @@ export function GameTemplateStep({ onSelect, onBack }: GameTemplateStepProps) {
               </div>
               <CardContent className="p-4">
                 <h3 className="font-medium text-lg">{template.name}</h3>
-                <p className="text-gray-400 text-sm">{template.description}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">{template.description}</p>
               </CardContent>
             </Card>
           ))}
         </div>
       ) : (
-        <div className="bg-gray-800 rounded-lg p-8 text-center">
-          <p className="text-gray-400 mb-2">No templates match your search criteria.</p>
-          <Button variant="outline" onClick={clearFilters} className="bg-gray-700 border-gray-600">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 text-center border border-gray-200 dark:border-gray-700">
+          <p className="text-gray-500 dark:text-gray-400 mb-2">No templates match your search criteria.</p>
+          <Button
+            variant="outline"
+            onClick={clearFilters}
+            className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+          >
             Clear Filters
           </Button>
         </div>
       )}
 
       <div className="flex justify-start mt-6">
-        <Button variant="outline" onClick={onBack} className="bg-gray-800 border-gray-700">
+        <Button
+          variant="outline"
+          onClick={onBack}
+          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+        >
           Back
         </Button>
       </div>

@@ -43,7 +43,7 @@ export function GameDetailsStep({ onSubmit, onBack, template, organizationType, 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-medium">Game Details</h2>
-      <p className="text-gray-400">Configure the details for your fundraising game.</p>
+      <p className="text-gray-500 dark:text-gray-400">Configure the details for your fundraising game.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
@@ -57,7 +57,7 @@ export function GameDetailsStep({ onSubmit, onBack, template, organizationType, 
                 onChange={handleChange}
                 placeholder="Enter a title for your game"
                 required
-                className="bg-gray-800 border-gray-700"
+                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
               />
             </div>
 
@@ -70,7 +70,7 @@ export function GameDetailsStep({ onSubmit, onBack, template, organizationType, 
                 onChange={handleChange}
                 placeholder="Describe your game and fundraising cause"
                 rows={4}
-                className="bg-gray-800 border-gray-700 resize-none"
+                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 resize-none"
               />
             </div>
 
@@ -86,7 +86,7 @@ export function GameDetailsStep({ onSubmit, onBack, template, organizationType, 
                     value={formData.startDate}
                     onChange={handleChange}
                     required
-                    className="bg-gray-800 border-gray-700 pl-10"
+                    className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 pl-10"
                   />
                 </div>
               </div>
@@ -102,7 +102,7 @@ export function GameDetailsStep({ onSubmit, onBack, template, organizationType, 
                     value={formData.endDate}
                     onChange={handleChange}
                     required
-                    className="bg-gray-800 border-gray-700 pl-10"
+                    className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 pl-10"
                   />
                 </div>
               </div>
@@ -122,7 +122,7 @@ export function GameDetailsStep({ onSubmit, onBack, template, organizationType, 
                     value={formData.entryFee}
                     onChange={handleChange}
                     required
-                    className="bg-gray-800 border-gray-700 pl-10"
+                    className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 pl-10"
                   />
                 </div>
               </div>
@@ -140,7 +140,7 @@ export function GameDetailsStep({ onSubmit, onBack, template, organizationType, 
                     value={formData.fundraisingGoal}
                     onChange={handleChange}
                     required
-                    className="bg-gray-800 border-gray-700 pl-10"
+                    className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 pl-10"
                   />
                 </div>
               </div>
@@ -149,10 +149,18 @@ export function GameDetailsStep({ onSubmit, onBack, template, organizationType, 
             <div className="flex justify-between mt-6 pb-6">
               {" "}
               {/* Added bottom padding */}
-              <Button type="button" variant="outline" onClick={onBack} className="bg-gray-800 border-gray-700">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onBack}
+                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+              >
                 Back
               </Button>
-              <Button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-black">
+              <Button
+                type="submit"
+                className="bg-amber-500 hover:bg-amber-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white dark:text-black"
+              >
                 Create Game
               </Button>
             </div>
@@ -160,7 +168,7 @@ export function GameDetailsStep({ onSubmit, onBack, template, organizationType, 
         </div>
 
         <div className="space-y-4">
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <h3 className="font-medium mb-2">Selected Template</h3>
               {template && (
@@ -174,25 +182,25 @@ export function GameDetailsStep({ onSubmit, onBack, template, organizationType, 
                     />
                   </div>
                   <h4 className="font-medium">{template.name}</h4>
-                  <p className="text-sm text-gray-400">{template.description}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{template.description}</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <h3 className="font-medium mb-2">Organization</h3>
               {organizationType === "nonprofit" && nonprofit ? (
                 <div>
                   <p className="font-medium">{nonprofit.name}</p>
-                  <p className="text-sm text-gray-400">EIN: {nonprofit.ein}</p>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">EIN: {nonprofit.ein}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {nonprofit.city}, {nonprofit.state}
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-gray-400">Local Organization (Stripe Connected)</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Local Organization (Stripe Connected)</p>
               )}
             </CardContent>
           </Card>

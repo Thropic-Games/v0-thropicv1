@@ -3,37 +3,47 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useFirebase } from "@/contexts/firebase-context"
+import { useSupabase } from "@/contexts/supabase-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Loader2 } from "lucide-react"
 
 export function AuthForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const { signIn, signUp } = useFirebase()
+  const [isLoading, setIsLoading] = useState(false)
+  const { signIn, signUp } = useSupabase()
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setIsLoading(true)
+
     try {
       await signIn(email, password)
     } catch (err) {
       setError("Failed to sign in. Please check your credentials.")
       console.error(err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setIsLoading(true)
+
     try {
       await signUp(email, password)
     } catch (err) {
       setError("Failed to create account. This email might be already in use.")
       console.error(err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -63,6 +73,7 @@ export function AuthForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="bg-gray-800 border-gray-700"
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -76,13 +87,21 @@ export function AuthForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="bg-gray-800 border-gray-700"
+                  disabled={isLoading}
                 />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full">
-                Sign In
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </CardFooter>
           </form>
@@ -106,6 +125,7 @@ export function AuthForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="bg-gray-800 border-gray-700"
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -119,13 +139,21 @@ export function AuthForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="bg-gray-800 border-gray-700"
+                  disabled={isLoading}
                 />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full">
-                Create Account
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
             </CardFooter>
           </form>

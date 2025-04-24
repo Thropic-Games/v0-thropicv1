@@ -10,32 +10,36 @@ interface ViewToggleProps {
   className?: string
 }
 
-export function ViewToggle({ view, onChange, className = "" }: ViewToggleProps) {
+export function ViewToggle({ view, onChange, className }: ViewToggleProps) {
   return (
-    <div className={cn("flex bg-gray-800 rounded-md p-1", className)}>
+    <div className={cn("flex items-center space-x-1", className)}>
       <Button
         variant="ghost"
-        size="sm"
-        className={cn(
-          "h-8 px-2 rounded-sm",
-          view === "grid" ? "bg-gray-700 text-white" : "text-gray-400 hover:text-white hover:bg-gray-700/50",
-        )}
+        size="icon"
         onClick={() => onChange("grid")}
+        className={cn(
+          "h-8 w-8",
+          view === "grid"
+            ? "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white"
+            : "text-gray-500 hover:text-gray-900 dark:hover:text-white",
+        )}
       >
-        <Grid className="h-4 w-4 mr-2" />
-        <span className="text-xs">Grid</span>
+        <Grid className="h-4 w-4" />
+        <span className="sr-only">Grid view</span>
       </Button>
       <Button
         variant="ghost"
-        size="sm"
-        className={cn(
-          "h-8 px-2 rounded-sm",
-          view === "list" ? "bg-gray-700 text-white" : "text-gray-400 hover:text-white hover:bg-gray-700/50",
-        )}
+        size="icon"
         onClick={() => onChange("list")}
+        className={cn(
+          "h-8 w-8",
+          view === "list"
+            ? "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white"
+            : "text-gray-500 hover:text-gray-900 dark:hover:text-white",
+        )}
       >
-        <List className="h-4 w-4 mr-2" />
-        <span className="text-xs">List</span>
+        <List className="h-4 w-4" />
+        <span className="sr-only">List view</span>
       </Button>
     </div>
   )

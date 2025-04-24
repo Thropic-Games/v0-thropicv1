@@ -91,19 +91,19 @@ export function GamesSearchFilter({ onSearch, onFilterChange, initialFilters }: 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="bg-gray-800 border-gray-700 pl-10"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 pl-10"
           />
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="bg-gray-800 border-gray-700">
+            <Button variant="outline" className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700">
               <Filter className="h-4 w-4 mr-2" />
               Filter
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 bg-gray-900 border-gray-800 text-white">
+          <DropdownMenuContent className="w-56 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white">
             <DropdownMenuLabel>Status</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-gray-800" />
+            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
             <DropdownMenuCheckboxItem
               checked={activeFilters.status.includes("In Progress")}
               onCheckedChange={() => toggleFilter("status", "In Progress")}
@@ -130,7 +130,7 @@ export function GamesSearchFilter({ onSearch, onFilterChange, initialFilters }: 
             </DropdownMenuCheckboxItem>
 
             <DropdownMenuLabel className="mt-2">Category</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-gray-800" />
+            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
             <DropdownMenuCheckboxItem
               checked={activeFilters.category.includes("Football")}
               onCheckedChange={() => toggleFilter("category", "Football")}
@@ -200,20 +200,33 @@ export function GamesSearchFilter({ onSearch, onFilterChange, initialFilters }: 
 
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-sm text-gray-400">Active filters:</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">Active filters:</span>
           {activeFilters.status.map((status) => (
-            <Badge key={status} variant="outline" className="bg-gray-800 border-gray-700 flex items-center gap-1">
+            <Badge
+              key={status}
+              variant="outline"
+              className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 flex items-center gap-1 text-gray-900 dark:text-white"
+            >
               {status}
               <X className="h-3 w-3 cursor-pointer" onClick={() => removeFilter("status", status)} />
             </Badge>
           ))}
           {activeFilters.category.map((category) => (
-            <Badge key={category} variant="outline" className="bg-gray-800 border-gray-700 flex items-center gap-1">
+            <Badge
+              key={category}
+              variant="outline"
+              className="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 flex items-center gap-1 text-gray-900 dark:text-white"
+            >
               {category}
               <X className="h-3 w-3 cursor-pointer" onClick={() => removeFilter("category", category)} />
             </Badge>
           ))}
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-400 hover:text-white h-7 px-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white h-7 px-2"
+          >
             Clear all
           </Button>
         </div>

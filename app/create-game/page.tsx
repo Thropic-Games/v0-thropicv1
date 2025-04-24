@@ -8,7 +8,7 @@ import { CreateGameForm } from "@/components/create-game/create-game-form"
 
 export default function CreateGamePage() {
   return (
-    <div className="flex flex-col h-full bg-black text-white overflow-hidden">
+    <div className="flex flex-col h-full bg-white dark:bg-black text-gray-900 dark:text-white overflow-hidden">
       {/* Header spans full width and stays fixed */}
       <SiteHeader />
 
