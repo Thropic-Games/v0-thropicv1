@@ -5,11 +5,14 @@ import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useFeaturedGames, type Game } from "@/hooks/use-featured-games"
+import { useVirtualizer } from "@tanstack/react-virtual"
+import { useRef } from "react"
 
 export function FeaturedGamesTable() {
   const [sortColumn, setSortColumn] = useState<keyof Game>("name")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
   const { games, loading, error } = useFeaturedGames()
+  const tableBodyRef = useRef<HTMLTableSectionElement>(null)
 
   const sortedGames = [...games].sort((a, b) => {
     if (sortColumn === "donation") {
@@ -22,6 +25,14 @@ export function FeaturedGamesTable() {
       const bValue = b[sortColumn]
       return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue)
     }
+  })
+
+  // Set up virtualization for table rows
+  const rowVirtualizer = useVirtualizer({
+    count: sortedGames.length,
+    getScrollElement: () => tableBodyRef.current,
+    estimateSize: () => 53, // Approximate height of a row in pixels
+    overscan: 5, // Number of items to render before/after the visible area
   })
 
   const toggleSort = (column: keyof Game) => {
@@ -112,16 +123,33 @@ export function FeaturedGamesTable() {
               </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {sortedGames.map((game) => (
-              <TableRow key={game.id} className="border-gray-800 hover:bg-gray-800/50">
-                <TableCell className="font-normal">{game.name}</TableCell>
-                <TableCell className="font-light">{game.partner}</TableCell>
-                <TableCell className="font-light text-yellow-500">{game.donation}</TableCell>
-                <TableCell className="font-light">{game.endDate}</TableCell>
-                <TableCell>{getStatusBadge(game.status)}</TableCell>
-              </TableRow>
-            ))}
+          <TableBody
+            ref={tableBodyRef}
+            className="max-h-[400px] overflow-auto"
+            style={{
+              height: `${Math.min(400, sortedGames.length * 53)}px`,
+              position: "relative",
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const game = sortedGames[virtualRow.index]
+              return (
+                <TableRow
+                  key={game.id}
+                  className="border-gray-800 hover:bg-gray-800/50 absolute w-full"
+                  style={{
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  <TableCell className="font-normal">{game.name}</TableCell>
+                  <TableCell className="font-light">{game.partner}</TableCell>
+                  <TableCell className="font-light text-yellow-500">{game.donation}</TableCell>
+                  <TableCell className="font-light">{game.endDate}</TableCell>
+                  <TableCell>{getStatusBadge(game.status)}</TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </div>

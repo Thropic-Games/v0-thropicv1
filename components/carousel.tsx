@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useInView } from "react-intersection-observer"
 
 interface CarouselProps {
   autoSlideInterval?: number
@@ -43,17 +44,45 @@ const heroImages = [
 export function Carousel({ autoSlideInterval = 8000, className = "", height = 400 }: CarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0])) // Start with first image loaded
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  const prev = () => {
-    setCurrentIndex((currentIndex) => (currentIndex === 0 ? heroImages.length - 1 : currentIndex - 1))
-  }
+  // Use intersection observer to detect if carousel is visible
+  const { ref: carouselRef, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: false,
+  })
 
-  const next = () => {
-    setCurrentIndex((currentIndex) => (currentIndex === heroImages.length - 1 ? 0 : currentIndex + 1))
-  }
+  const prev = useCallback(() => {
+    const newIndex = currentIndex === 0 ? heroImages.length - 1 : currentIndex - 1
+    setCurrentIndex(newIndex)
+    // Preload the image
+    setLoadedImages((prev) => new Set(prev).add(newIndex))
+  }, [currentIndex])
 
-  // Start or stop the autoplay based on hover state
+  const next = useCallback(() => {
+    const newIndex = currentIndex === heroImages.length - 1 ? 0 : currentIndex + 1
+    setCurrentIndex(newIndex)
+    // Preload the image
+    setLoadedImages((prev) => new Set(prev).add(newIndex))
+  }, [currentIndex])
+
+  // Preload adjacent images
+  useEffect(() => {
+    // Preload next image
+    const nextIndex = (currentIndex + 1) % heroImages.length
+    // Preload previous image
+    const prevIndex = currentIndex === 0 ? heroImages.length - 1 : currentIndex - 1
+
+    setLoadedImages((prev) => {
+      const newSet = new Set(prev)
+      newSet.add(nextIndex)
+      newSet.add(prevIndex)
+      return newSet
+    })
+  }, [currentIndex])
+
+  // Start or stop the autoplay based on hover state and visibility
   useEffect(() => {
     // Clear any existing interval
     if (intervalRef.current) {
@@ -61,8 +90,8 @@ export function Carousel({ autoSlideInterval = 8000, className = "", height = 40
       intervalRef.current = null
     }
 
-    // Only start a new interval if not hovering
-    if (!isHovering) {
+    // Only start a new interval if not hovering and carousel is in view
+    if (!isHovering && inView) {
       intervalRef.current = setInterval(next, autoSlideInterval)
     }
 
@@ -72,10 +101,11 @@ export function Carousel({ autoSlideInterval = 8000, className = "", height = 40
         clearInterval(intervalRef.current)
       }
     }
-  }, [isHovering, autoSlideInterval])
+  }, [isHovering, inView, autoSlideInterval, next])
 
   return (
     <div
+      ref={carouselRef}
       className={`relative overflow-hidden rounded-xl ${className}`}
       style={{ height: `${height}px` }}
       onMouseEnter={() => setIsHovering(true)}
@@ -87,14 +117,18 @@ export function Carousel({ autoSlideInterval = 8000, className = "", height = 40
       >
         {heroImages.map((image, index) => (
           <div key={index} className="w-full flex-shrink-0 h-full relative rounded-xl overflow-hidden">
-            <Image
-              src={image.src || "/placeholder.svg"}
-              alt={image.alt}
-              fill
-              className="object-cover"
-              priority={index === 0}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-            />
+            {/* Only render images that are loaded or need to be loaded */}
+            {loadedImages.has(index) && (
+              <Image
+                src={image.src || "/placeholder.svg"}
+                alt={image.alt}
+                fill
+                className="object-cover"
+                priority={index === 0}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                loading={index === 0 ? "eager" : "lazy"}
+              />
+            )}
 
             {/* Text Box */}
             <div className="absolute bottom-8 left-8 right-8 md:right-auto md:max-w-md bg-black bg-opacity-40 rounded-xl p-4">
@@ -130,7 +164,10 @@ export function Carousel({ autoSlideInterval = 8000, className = "", height = 40
           <button
             key={index}
             className={`w-2.5 h-2.5 rounded-full ${currentIndex === index ? "bg-white" : "bg-white/50"}`}
-            onClick={() => setCurrentIndex(index)}
+            onClick={() => {
+              setCurrentIndex(index)
+              setLoadedImages((prev) => new Set(prev).add(index))
+            }}
           >
             <span className="sr-only">Go to slide {index + 1}</span>
           </button>

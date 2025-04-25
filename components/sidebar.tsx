@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Compass, GamepadIcon, User, PlusCircle, Settings } from "lucide-react"
@@ -18,15 +16,6 @@ export function Sidebar() {
     if (path === "/" && pathname === "/") return true
     if (path !== "/" && pathname.startsWith(path)) return true
     return false
-  }
-
-  const handleProfileClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    if (user) {
-      router.push("/profile")
-    } else {
-      router.push("/login")
-    }
   }
 
   return (
@@ -57,11 +46,10 @@ export function Sidebar() {
             <GamepadIcon className="h-5 w-5" />
             <span>Games</span>
           </Link>
-          <a
-            href="#"
-            onClick={handleProfileClick}
+          <Link
+            href="/profile"
             className={cn(
-              "flex items-center gap-3 py-3 px-4 cursor-pointer",
+              "flex items-center gap-3 py-3 px-4",
               isActive("/profile")
                 ? "border-l-[3px] border-orange-600 bg-gradient-to-r from-orange-100/50 dark:from-orange-600/20 to-transparent text-orange-700 dark:text-yellow-500 font-medium"
                 : "hover:bg-gradient-to-r hover:from-gray-100/80 dark:hover:from-gray-800/80 hover:to-transparent font-light",
@@ -69,7 +57,7 @@ export function Sidebar() {
           >
             <User className="h-5 w-5" />
             <span>Profile</span>
-          </a>
+          </Link>
 
           <div className="my-6 border-t border-gray-200 dark:border-gray-800"></div>
 

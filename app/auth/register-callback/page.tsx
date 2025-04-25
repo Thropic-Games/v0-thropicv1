@@ -2,67 +2,116 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { checkUserProfileExists } from "@/actions/profile"
 
-export default function AuthRegisterCallbackPage() {
-  const [error, setError] = useState<string | null>(null)
+export default function RegisterCallbackPage() {
   const router = useRouter()
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
+  const [errorMessage, setErrorMessage] = useState("")
+  const [debugInfo, setDebugInfo] = useState<string | null>(null)
 
   useEffect(() => {
-    const handleCallback = async () => {
+    const handleAuthCallback = async () => {
       try {
-        // Get the auth code from the URL
-        const { searchParams } = new URL(window.location.href)
-        const code = searchParams.get("code")
+        // Get the hash from the URL if it exists
+        const hash = window.location.hash
 
-        if (!code) {
-          setError("No authentication code found in the URL")
-          return
+        // Log the hash for debugging (will be removed in production)
+        if (hash) {
+          console.log("Register callback hash detected")
         }
 
-        // Exchange the code for a session
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        const { data, error } = await supabase.auth.getSession()
 
         if (error) {
-          console.error("Error exchanging code for session:", error)
-          setError(error.message)
+          console.error("Register callback error:", error)
+          setStatus("error")
+          setErrorMessage(error.message)
+          setDebugInfo(`Error code: ${error.status || "unknown"}`)
           return
         }
 
-        // Redirect to profile completion page after successful registration
-        router.push("/profile/edit?new=true")
-      } catch (err) {
-        console.error("Unexpected error during authentication callback:", err)
-        setError("An unexpected error occurred during authentication")
+        if (!data.session) {
+          console.warn("No session found in register callback")
+          setStatus("error")
+          setErrorMessage("Authentication failed. No session was created.")
+          return
+        }
+
+        console.log("Register callback successful, session established")
+        setStatus("success")
+
+        // Check if user profile exists
+        const userId = data.session.user.id
+        const { exists, error: profileError } = await checkUserProfileExists(userId)
+
+        if (profileError) {
+          console.warn("Error checking profile:", profileError)
+          // Continue with the flow even if there's an error checking the profile
+        }
+
+        // Redirect after successful authentication
+        setTimeout(() => {
+          if (exists) {
+            // User profile exists, redirect to profile page
+            router.push("/profile")
+          } else {
+            // User profile doesn't exist, redirect to profile creation page
+            router.push("/profile/edit?new=true")
+          }
+        }, 2000)
+      } catch (error) {
+        console.error("Error during register callback:", error)
+        const errorMessage = error instanceof Error ? error.message : "Unknown error"
+        setStatus("error")
+        setErrorMessage("An unexpected error occurred during registration")
+        setDebugInfo(errorMessage)
       }
     }
 
-    handleCallback()
+    handleAuthCallback()
   }, [router])
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white dark:bg-gray-950">
-      <div className="w-full max-w-md p-8 space-y-4 text-center">
-        {error ? (
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800/30">
-            <h2 className="text-lg font-medium text-red-800 dark:text-red-400 mb-2">Authentication Error</h2>
-            <p className="text-red-600 dark:text-red-400">{error}</p>
-            <button
-              onClick={() => router.push("/register")}
-              className="mt-4 px-4 py-2 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-md hover:bg-red-200 dark:hover:bg-red-800/60"
-            >
-              Back to Registration
-            </button>
-          </div>
-        ) : (
-          <>
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-[#fb6542] dark:text-[#ffbb00]" />
-            <h2 className="text-xl font-medium text-gray-900 dark:text-white">Setting up your account...</h2>
-            <p className="text-gray-600 dark:text-gray-400">Please wait while we complete your registration.</p>
-          </>
-        )}
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Registration</CardTitle>
+          <CardDescription>Completing your registration process</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center py-8">
+          {status === "loading" && (
+            <>
+              <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+              <p>Verifying your registration...</p>
+            </>
+          )}
+
+          {status === "success" && (
+            <>
+              <CheckCircle className="h-8 w-8 text-green-500 mb-4" />
+              <p className="text-center mb-4">Successfully registered! Redirecting you...</p>
+            </>
+          )}
+
+          {status === "error" && (
+            <>
+              <AlertCircle className="h-8 w-8 text-red-500 mb-4" />
+              <p className="text-center text-red-500 mb-4">{errorMessage}</p>
+              {debugInfo && (
+                <div className="text-xs bg-red-100 dark:bg-red-900/40 p-2 rounded overflow-auto max-h-24 mb-4 w-full">
+                  <code>{debugInfo}</code>
+                </div>
+              )}
+              <Button onClick={() => router.push("/register")}>Return to Registration</Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

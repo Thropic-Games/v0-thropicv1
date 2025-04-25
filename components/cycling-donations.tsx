@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
+import { useSupabaseAuth } from "@/contexts/supabase-auth-context"
 
 interface Donation {
   id: string
@@ -29,18 +30,20 @@ export function CyclingDonations({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isClient, setIsClient] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const { session } = useSupabaseAuth() // Get authentication status
 
   // Set isClient to true when component mounts
   useEffect(() => {
     setIsClient(true)
     console.log("CyclingDonations mounted with", donations.length, "donations")
+    console.log("Authentication status:", session ? "Authenticated" : "Not authenticated")
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
       }
     }
-  }, [donations.length])
+  }, [donations.length, session])
 
   // Get the current visible donations
   const getVisibleDonations = () => {
@@ -96,7 +99,10 @@ export function CyclingDonations({
     <div className="space-y-2">
       {showDebug && (
         <div className="text-xs text-gray-400 mb-2">
-          Index: {currentIndex}/{donations.length}
+          <div>
+            Index: {currentIndex}/{donations.length}
+          </div>
+          <div>Auth: {session ? "Yes" : "No"}</div>
         </div>
       )}
       {visibleDonations.map((donation, index) => (

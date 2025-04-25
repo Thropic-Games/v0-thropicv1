@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SupabaseProvider } from "@/contexts/supabase-context"
 import { SupabaseAuthProvider } from "@/contexts/supabase-auth-context"
+import { AuthDebugPanel } from "@/components/auth-debug-panel"
 
 const barlowCondensed = Barlow_Condensed({
   subsets: ["latin"],
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="w-full max-w-[1240px] h-[calc(100vh-theme(spacing.4))] sm:h-[calc(100vh-theme(spacing.4))] md:h-[calc(100vh-theme(spacing.8))] lg:h-[calc(100vh-theme(spacing.12))] bg-white dark:bg-black rounded-none sm:rounded-xl overflow-hidden shadow-2xl">
                 {children}
               </div>
+              <AuthDebugPanel />
             </SupabaseAuthProvider>
           </SupabaseProvider>
         </ThemeProvider>

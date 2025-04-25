@@ -1,83 +1,79 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { useSupabase } from "@/hooks/use-supabase"
-import type { User } from "@supabase/supabase-js"
-import type { Profile } from "@/types/supabase"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import type { UserWithAddress } from "@/types/database"
 
-export function UserProfile() {
-  const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const { supabase } = useSupabase()
+export default function UserProfile({ initialUser }: { initialUser?: UserWithAddress }) {
+  const [user, setUser] = useState<UserWithAddress | null>(initialUser || null)
+  const [loading, setLoading] = useState(!initialUser)
   const router = useRouter()
+  const supabase = createClientComponentClient()
 
   useEffect(() => {
-    const fetchUserAndProfile = async () => {
+    async function loadUserData() {
       try {
-        // Get current user
         const {
-          data: { user },
-        } = await supabase.auth.getUser()
-        setUser(user)
+          data: { session },
+        } = await supabase.auth.getSession()
 
-        if (user) {
-          // Fetch user profile
-          const { data, error } = await supabase.from("profile").select("*").eq("id", user.id).single()
+        if (!session?.user) {
+          setUser(null)
+          setLoading(false)
+          return
+        }
 
-          if (error) {
-            console.error("Error fetching profile:", error)
-          } else {
-            setProfile(data)
-          }
+        const { data, error } = await supabase
+          .from("user")
+          .select(`
+            *,
+            address:address_id (*)
+          `)
+          .eq("id", session.user.id)
+          .single()
+
+        if (error) {
+          console.error("Error loading user data:", error)
+          setUser(null)
+        } else {
+          setUser(data)
         }
       } catch (error) {
-        console.error("Error fetching user data:", error)
+        console.error("Error in loadUserData:", error)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchUserAndProfile()
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null)
-      if (!session?.user) {
-        setProfile(null)
-      }
-    })
-
-    return () => {
-      authListener.subscription.unsubscribe()
+    if (!initialUser) {
+      loadUserData()
     }
-  }, [supabase])
+  }, [initialUser, supabase])
 
   const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut()
-      router.push("/")
-    } catch (error) {
-      console.error("Error signing out:", error)
-    }
+    await supabase.auth.signOut()
+    router.refresh()
+  }
+
+  const handleEditProfile = () => {
+    router.push("/profile/edit")
   }
 
   if (loading) {
     return (
       <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-7 w-40 rounded mb-2"></div>
-          <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-5 w-64 rounded"></div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-5 w-full rounded"></div>
-          <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-5 w-3/4 rounded"></div>
+        <CardContent className="pt-6">
+          <div className="flex justify-center">
+            <div className="h-32 w-32 rounded-full bg-gray-200 animate-pulse" />
+          </div>
+          <div className="space-y-2 mt-4">
+            <div className="h-4 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-5/6" />
+          </div>
         </CardContent>
-        <CardFooter>
-          <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-9 w-24 rounded"></div>
-        </CardFooter>
       </Card>
     )
   }
@@ -85,13 +81,10 @@ export function UserProfile() {
   if (!user) {
     return (
       <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle>Not Signed In</CardTitle>
-          <CardDescription>You need to sign in to view your profile</CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button onClick={() => router.push("/login")}>Sign In</Button>
-        </CardFooter>
+        <CardContent className="pt-6 text-center">
+          <p className="mb-4">You are not logged in.</p>
+          <Button onClick={() => router.push("/login")}>Log In</Button>
+        </CardContent>
       </Card>
     )
   }
@@ -99,40 +92,55 @@ export function UserProfile() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>{profile?.full_name || user.email}</CardTitle>
-        <CardDescription>{user.email}</CardDescription>
+        <CardTitle className="text-center">User Profile</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {profile ? (
-          <>
-            {profile.username && (
-              <p>
-                <strong>Username:</strong> {profile.username}
-              </p>
-            )}
-            {profile.bio && (
-              <p>
-                <strong>Bio:</strong> {profile.bio}
-              </p>
-            )}
-            {profile.website && (
-              <p>
-                <strong>Website:</strong> {profile.website}
-              </p>
-            )}
-          </>
-        ) : (
-          <p>No profile information available. Please complete your profile.</p>
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-muted-foreground">Name</p>
+          <p>{user.name || "Not provided"}</p>
+        </div>
+
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-muted-foreground">Email</p>
+          <p>{user.email}</p>
+        </div>
+
+        {user.phone && (
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">Phone</p>
+            <p>{user.phone}</p>
+          </div>
         )}
+
+        {user.dob && (
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
+            <p>{new Date(user.dob).toLocaleDateString()}</p>
+          </div>
+        )}
+
+        {user.address && (
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">Address</p>
+            <p>
+              {user.address.street}
+              <br />
+              {user.address.city}, {user.address.state} {user.address.postal_code}
+              <br />
+              {user.address.country}
+            </p>
+          </div>
+        )}
+
+        <div className="pt-4 flex flex-col sm:flex-row gap-2">
+          <Button onClick={handleEditProfile} className="flex-1">
+            Edit Profile
+          </Button>
+          <Button onClick={handleSignOut} variant="outline" className="flex-1">
+            Sign Out
+          </Button>
+        </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={() => router.push("/profile/edit")}>
-          Edit Profile
-        </Button>
-        <Button variant="destructive" onClick={handleSignOut}>
-          Sign Out
-        </Button>
-      </CardFooter>
     </Card>
   )
 }

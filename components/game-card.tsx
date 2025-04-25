@@ -4,8 +4,6 @@ import type React from "react"
 
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ExternalLink } from "lucide-react"
 import { navigateToGame } from "@/lib/utils"
 
 interface GameCardProps {
@@ -87,16 +85,6 @@ export function GameCard({
             {sponsor && <p className="text-sm text-gray-600 dark:text-gray-400">By {sponsor}</p>}
             {donation && <p className="text-sm text-orange-600 dark:text-yellow-500 font-medium">{donation}</p>}
           </div>
-          {game && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full mt-2 flex items-center justify-center"
-              onClick={handleClick}
-            >
-              Open Game <ExternalLink className="h-3 w-3 ml-1" />
-            </Button>
-          )}
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, memo } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -16,10 +16,37 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, Settings, UserCircle } from "lucide-react"
 
-export function UserAuthStatus() {
-  const { user, signOut, loading } = useSupabaseAuth()
+export const UserAuthStatus = memo(function UserAuthStatus() {
+  const { user, signOut, loading, initialized } = useSupabaseAuth()
   const router = useRouter()
   const [isSigningOut, setIsSigningOut] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Add this console log in the component body:
+  console.log("UserAuthStatus render:", {
+    user: user?.email || null,
+    loading,
+    initialized,
+  })
+
+  // Ensure we're mounted before rendering
+  useEffect(() => {
+    setMounted(true)
+
+    // Only log once on mount
+    console.log("UserAuthStatus mounted, auth state:", {
+      user: user?.email || "no user",
+      loading,
+      initialized,
+      authenticated: !!user,
+    })
+  }, []) // Empty dependency array ensures this only runs once
+
+  // Don't render anything until we're mounted
+  if (!mounted) {
+    console.log("UserAuthStatus not mounted yet")
+    return null
+  }
 
   const handleSignOut = async () => {
     try {
@@ -33,7 +60,7 @@ export function UserAuthStatus() {
     }
   }
 
-  if (loading) {
+  if (loading || !initialized) {
     return (
       <div className="flex items-center space-x-2">
         <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
@@ -98,4 +125,4 @@ export function UserAuthStatus() {
       </DropdownMenuContent>
     </DropdownMenu>
   )
-}
+})

@@ -17,11 +17,17 @@ export async function sendMagicLink(formData: FormData) {
 
     console.log(`Sending magic link for ${isRegistration ? "registration" : "login"} to: ${email}`)
 
-    // Get the site URL from environment variable or use a fallback
-    const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000"
+    // Get the site URL from environment variable
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ""
+
+    if (!siteUrl) {
+      console.error("NEXT_PUBLIC_SITE_URL is not defined")
+      return {
+        success: false,
+        error: "Site URL is not configured",
+        debugInfo: "NEXT_PUBLIC_SITE_URL environment variable is missing",
+      }
+    }
 
     const redirectPath = isRegistration ? "/auth/register-callback" : "/auth/callback"
     console.log(`Using redirect URL: ${siteUrl}${redirectPath}`)

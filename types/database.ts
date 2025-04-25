@@ -139,6 +139,7 @@ export interface Database {
           country: string | null
           created_ts: string | null
           updated_ts: string | null
+          postal_code: string | null
         }
         Insert: {
           id?: string
@@ -149,6 +150,7 @@ export interface Database {
           country?: string | null
           created_ts?: string | null
           updated_ts?: string | null
+          postal_code?: string | null
         }
         Update: {
           id?: string
@@ -159,6 +161,7 @@ export interface Database {
           country?: string | null
           created_ts?: string | null
           updated_ts?: string | null
+          postal_code?: string | null
         }
         Relationships: []
       }

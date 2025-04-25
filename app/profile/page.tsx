@@ -13,15 +13,23 @@ import { GlobalScrollContainer } from "@/components/global-scroll-container"
 import { StaticHorizontalMenu } from "@/components/static-horizontal-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { useSupabase } from "@/contexts/supabase-context"
-import { getUserProfile, type UserProfile } from "@/actions/user"
+import { useSupabaseAuth } from "@/contexts/supabase-auth-context" // CHANGED: Use useSupabaseAuth instead of useSupabase
+import { getUserProfile } from "@/actions/user"
+import type { UserWithAddress } from "@/types/supabase"
 
 export default function ProfilePage() {
   const [imageHover, setImageHover] = useState(false)
-  const { user, loading: authLoading } = useSupabase()
-  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const { user, loading: authLoading } = useSupabaseAuth() // CHANGED: Use useSupabaseAuth instead of useSupabase
+  const [profile, setProfile] = useState<UserWithAddress | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Debug log to see auth state
+  console.log("Profile page auth state:", {
+    user: user?.email || "no user",
+    authLoading,
+    authenticated: !!user,
+  })
 
   // Mock data for demonstration
   const hasUnclaimedBalance = true
@@ -36,12 +44,14 @@ export default function ProfilePage() {
 
       try {
         setLoading(true)
+        console.log("Fetching profile for user:", user.id)
         const { data, error } = await getUserProfile(user.id)
 
         if (error) {
           console.error("Error fetching profile:", error)
           setError("Failed to load profile data")
         } else {
+          console.log("Profile data retrieved:", data ? "success" : "no data")
           setProfile(data)
         }
       } catch (err) {
@@ -57,7 +67,8 @@ export default function ProfilePage() {
     }
   }, [user, authLoading])
 
-  if (authLoading || loading) {
+  // If still loading auth state, show loading indicator
+  if (authLoading) {
     return (
       <div className="flex flex-col h-full bg-white dark:bg-black text-gray-900 dark:text-white overflow-hidden">
         <SiteHeader />
@@ -65,14 +76,15 @@ export default function ProfilePage() {
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-yellow-500" />
-            <p>Loading profile...</p>
+            <p>Loading authentication status...</p>
           </div>
         </div>
       </div>
     )
   }
 
-  if (error || !user) {
+  // If not authenticated, show login prompt
+  if (!user) {
     return (
       <div className="flex flex-col h-full bg-white dark:bg-black text-gray-900 dark:text-white overflow-hidden">
         <SiteHeader />
@@ -81,7 +93,7 @@ export default function ProfilePage() {
           <Card className="w-full max-w-md">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="mb-4">{error || "Please sign in to view your profile"}</p>
+                <p className="mb-4">Please sign in to view your profile</p>
                 <Button asChild>
                   <Link href="/login">Sign In</Link>
                 </Button>
@@ -93,10 +105,43 @@ export default function ProfilePage() {
     )
   }
 
-  const displayName =
-    profile?.first_name && profile?.last_name
-      ? `${profile.first_name} ${profile.last_name}`
-      : profile?.username || user.email?.split("@")[0] || "User"
+  // If there was an error loading profile data
+  if (error) {
+    return (
+      <div className="flex flex-col h-full bg-white dark:bg-black text-gray-900 dark:text-white overflow-hidden">
+        <SiteHeader />
+        <StaticHorizontalMenu />
+        <div className="flex-1 flex items-center justify-center">
+          <Card className="w-full max-w-md">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="mb-4">{error}</p>
+                <Button onClick={() => window.location.reload()}>Retry</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // If loading profile data
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full bg-white dark:bg-black text-gray-900 dark:text-white overflow-hidden">
+        <SiteHeader />
+        <StaticHorizontalMenu />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-yellow-500" />
+            <p>Loading profile data...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const displayName = profile?.name || user.email?.split("@")[0] || "User"
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-black text-gray-900 dark:text-white overflow-hidden">
@@ -128,7 +173,7 @@ export default function ProfilePage() {
                       >
                         <div className="w-28 h-28 rounded-full overflow-hidden">
                           <Image
-                            src={profile?.avatar_url || "/placeholder.svg?height=112&width=112"}
+                            src="/placeholder.svg?height=112&width=112"
                             alt="User Profile"
                             width={112}
                             height={112}
@@ -150,9 +195,7 @@ export default function ProfilePage() {
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                           <div>
                             <h1 className="text-2xl font-medium">{displayName}</h1>
-                            <p className="text-gray-500 dark:text-gray-400 font-light">
-                              {profile?.username ? `@${profile.username}` : user.email}
-                            </p>
+                            <p className="text-gray-500 dark:text-gray-400 font-light">{user.email}</p>
                           </div>
                           <div className="mt-2 md:mt-0 flex justify-center md:justify-end gap-2">
                             <Button
@@ -178,7 +221,7 @@ export default function ProfilePage() {
                         </div>
 
                         {/* Bio */}
-                        {profile?.bio && <p className="mt-2 text-gray-600 dark:text-gray-300">{profile.bio}</p>}
+                        {profile?.name && <p className="mt-2 text-gray-600 dark:text-gray-300">{profile.name}</p>}
 
                         {/* Stats Row */}
                         <div className="flex flex-wrap justify-center md:justify-start gap-6 mt-4">
@@ -234,6 +277,7 @@ export default function ProfilePage() {
                   </CardContent>
                 </Card>
 
+                {/* Rest of the profile page content remains the same */}
                 {/* Contact Information Card */}
                 <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 mb-6">
                   <CardHeader>
@@ -243,20 +287,23 @@ export default function ProfilePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
-                        <p>{user.email}</p>
+                        <p>{profile?.email || user.email}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
-                        <p>{profile?.phone_number || "Not provided"}</p>
+                        <p>{profile?.phone || "Not provided"}</p>
                       </div>
                       <div className="md:col-span-2">
                         <p className="text-sm text-gray-500 dark:text-gray-400">Address</p>
                         <p>
                           {profile?.address ? (
                             <>
-                              {profile.address}
-                              {profile.city && profile.state ? `, ${profile.city}, ${profile.state}` : ""}
-                              {profile.zip ? ` ${profile.zip}` : ""}
+                              {profile.address.street}
+                              {profile.address.city && profile.address.state
+                                ? `, ${profile.address.city}, ${profile.address.state}`
+                                : ""}
+                              {profile.address.zip ? ` ${profile.address.zip}` : ""}
+                              {profile.address.country ? `, ${profile.address.country}` : ""}
                             </>
                           ) : (
                             "Not provided"
